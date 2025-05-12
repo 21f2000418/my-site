@@ -13,11 +13,11 @@ def handler(request, response):
     query = parse_qs(request.query_string. decode())
     names = query.get("name", [])
 
-    with open("marks.csv", "r") as f:
-        reader = csv.DictReader(f)
-        name_to_marks = {row["name"]: int(row["mark"]) for row in reader}
+    with open("q-vercel-python.json", "r") as f:
+        data = json.load(f)
+        name_to_marks = {entry["name"]: int(entry["mark"]) for entry in data}
 
     marks = [name_to_marks.get(name, None) for name in names]
 
     # Return the JSON response
-    return response.send(json.dumps({"marks": marks}), headers={"Content-Type": "application/json"})
+    return response.send(json.dumps({"marks": marks}), content_type="application/json")
