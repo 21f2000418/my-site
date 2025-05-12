@@ -1,6 +1,5 @@
 import json
 from urllib.parse import parse_qs
-import csv
 
 
 def handler(request, response):
@@ -13,7 +12,7 @@ def handler(request, response):
     query = parse_qs(request.query_string. decode())
     names = query.get("name", [])
 
-    with open("q-vercel-python.json", "r") as f:
+    with open("q-vercel-python.json") as f:
         data = json.load(f)
         name_to_marks = {entry["name"]: int(entry["mark"]) for entry in data}
 
