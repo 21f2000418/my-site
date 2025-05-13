@@ -1,29 +1,44 @@
-from http.server import BaseHTTPRequestHandler
 import json
 import os
 
-class handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        # Set CORS headers
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-        self.end_headers()
+def handler(request):
+    headers = {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET",
+        "Access-Control-Allow-Headers": "Content-Type"
+    }
 
-        # Parse query parameters
-        from urllib.parse import parse_qs, urlparse
-        query = parse_qs(urlparse(self.path).query)
+    if request.method != "GET":
+        return {
+            "statusCode": 405,
+            "headers": headers,
+            "body": json.dumps({"error": "Method not allowed"})
+        }
+
+    try:
+        # Parse query
+        query = request.query
         names = query.get("name", [])
+        if isinstance(names, str):
+            names = [names]
 
-        # Load marks.json (ensure correct path)
-        file_path = os.path.join(os.path.dirname(__file__), "marks.json")
+        # Load marks.json
+        file_path = os.path.join(os.path.dirname(__file__), "../marks.json")
         with open(file_path, "r") as f:
             data = json.load(f)
+
         marks_dict = {entry['name']: entry['marks'] for entry in data}
-
         marks = [marks_dict.get(name, None) for name in names]
-        response = json.dumps({"marks": marks})
 
-        self.wfile.write(response.encode())
+        return {
+            "statusCode": 200,
+            "headers": headers,
+            "body": json.dumps({"marks": marks})
+        }
+
+    except Exception as e:
+        return {
+            "statusCode": 500,
+            "headers": headers,
+            "body": json.dumps({"error": str(e)})
+        }
