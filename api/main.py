@@ -21,6 +21,7 @@ marks_dict = {entry['name']: entry['marks'] for entry in data}
 @app.get("/api")
 def get_marks(name: list[str] = Query([])):
     # Return marks in the order of names provided
-    print(marks_dict)  # Debugging line to check the loaded data
-    marks = [marks_dict.get(n, None) for n in name]
+    print(marks_dict)  # Debugging line to check the loaded data\
+    print(name)
+    marks = [marks_dict[n] for n in name]
     return {"marks": marks}
