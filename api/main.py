@@ -14,7 +14,7 @@ app.add_middleware(
 )
 
 # Load marks.json once at startup
-with open("marks.json") as f:
+with open("q-vercel-python.json") as f:
     data = json.load(f)
 marks_dict = {entry['name']: entry['marks'] for entry in data}
 
