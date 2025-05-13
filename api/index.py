@@ -1,30 +1,30 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
 import json
-import os
 
-app = Flask(__name__)
-CORS(app, resources={r"/api": {"origins": "*"}})  # Enable CORS for /api endpoint
+def handler(request, response):
+    # Enable CORS
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
 
-# Load marks.json from the project root
-with open(os.path.join(os.path.dirname(__file__), '..', 'q-vercel-python.json'), 'r') as f:
-    marks_data = json.load(f)
+    # Only allow GET
+    if request.method != "GET":
+        response.status_code = 405
+        return response.json({"error": "Method not allowed"})
 
-@app.route('/api', methods=['GET'])
-def get_marks():
-    # Get list of names from query parameters
-    names = request.args.getlist('name')
-    if not names:
-        return jsonify({"error": "At least one name is required"}), 400
+    # Load marks.json
+    with open("q-vercel-python.json", "r") as f:
+        data = json.load(f)
 
-    # Fetch marks in the order of names provided
-    result = []
-    for name in names:
-        # Search for the student in marks_data
-        student = next((item for item in marks_data if item["name"] == name), None)
-        if student:
-            result.append(student["marks"])
-        else:
-            return jsonify({"error": f"Student {name} not found"}), 404
+    # Build a name->marks dict for quick lookup
+    marks_dict = {entry['name']: entry['marks'] for entry in data}
 
-    return jsonify({"marks": result}), 200
+    # Get names from query params
+    names = request.query.getlist("name")
+    # For single name, getlist may not work, so handle both
+    if not isinstance(names, list):
+        names = [names]
+
+    # Get marks in order
+    marks = [marks_dict.get(name, None) for name in names]
+
+    return response.json({"marks": marks})
