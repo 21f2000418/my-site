@@ -1,0 +1,11 @@
+name: Hello World Workflow
+on:
+  push:
+    branches:
+      - main
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 21f2000418@ds.study.iitm.ac.in
+        run: echo "Hello, world!"
