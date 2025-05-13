@@ -17,6 +17,7 @@ app.add_middleware(
 with open("q-vercel-python.json") as f:
     data = json.load(f)
 marks_dict = {entry['name']: entry['marks'] for entry in data}
+print(marks_dict)  # Debugging line to check the loaded data
 
 @app.get("/api")
 def get_marks(name: list[str] = Query([])):
