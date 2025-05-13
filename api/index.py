@@ -19,6 +19,7 @@ def handler(request):
         # Load the JSON data
         with open("q-vercel-python.json", "r") as f:
             data = json.load(f)
+        print(data)
 
         # Create a name->marks mapping
         marks_dict = {entry['name']: entry['marks'] for entry in data}
