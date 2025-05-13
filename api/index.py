@@ -1,44 +1,25 @@
+from fastapi import FastAPI, Query
+from fastapi.middleware.cors import CORSMiddleware
 import json
-import os
 
-def handler(request):
-    headers = {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET",
-        "Access-Control-Allow-Headers": "Content-Type"
-    }
+app = FastAPI()
 
-    if request.method != "GET":
-        return {
-            "statusCode": 405,
-            "headers": headers,
-            "body": json.dumps({"error": "Method not allowed"})
-        }
+# Enable CORS for all origins and all methods/headers
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-    try:
-        # Parse query
-        query = request.query
-        names = query.get("name", [])
-        if isinstance(names, str):
-            names = [names]
+# Load marks.json once at startup
+with open("marks.json") as f:
+    data = json.load(f)
+marks_dict = {entry['name']: entry['marks'] for entry in data}
 
-        # Load marks.json
-        file_path = os.path.join(os.path.dirname(__file__), "../marks.json")
-        with open(file_path, "r") as f:
-            data = json.load(f)
-
-        marks_dict = {entry['name']: entry['marks'] for entry in data}
-        marks = [marks_dict.get(name, None) for name in names]
-
-        return {
-            "statusCode": 200,
-            "headers": headers,
-            "body": json.dumps({"marks": marks})
-        }
-
-    except Exception as e:
-        return {
-            "statusCode": 500,
-            "headers": headers,
-            "body": json.dumps({"error": str(e)})
-        }
+@app.get("/api")
+def get_marks(name: list[str] = Query([])):
+    # Return marks in the order of names provided
+    marks = [marks_dict.get(n, None) for n in name]
+    return {"marks": marks}
